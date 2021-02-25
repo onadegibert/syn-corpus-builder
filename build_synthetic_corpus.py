@@ -82,8 +82,9 @@ def convert_to_webanno(original_files, gazetteers):
                     last_tag_id += add_tag
                 last_tag = tag
                 tok_index += 1
-            converted_file.append("\n#Text=" + sentence)
-            converted_file.extend(tokens_processed)
+            if sentence != '':
+                converted_file.append("\n#Text=" + sentence)
+                converted_file.extend(tokens_processed)
             sen_index += 1
         converted_files.append(converted_file)
         print("Files processed: ", len(converted_files))
