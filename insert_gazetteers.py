@@ -22,11 +22,11 @@ def choose_gazetteers(previous_token,gazetteers):
     print(name)
     for name_category in name:
         if name_category == 'f':
-            token = 'XX' + random.choice(gazetteers['female_names'])
+            token = 'XX' + random.choice(gazetteers['female_names'][:500])
         if name_category == 'm':
-            token = 'XX' + random.choice(gazetteers['male_names'])
+            token = 'XX' + random.choice(gazetteers['male_names'][:500])
         if name_category == 's':
-            token = token + ' XX' + random.choice(gazetteers['surnames'])
+            token = token + ' XX' + random.choice(gazetteers['surnames'][:500])
     return token
 
 
