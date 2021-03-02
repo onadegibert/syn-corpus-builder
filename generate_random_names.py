@@ -37,10 +37,8 @@ def write_files(list):
             fn.write(line+'\n')
 
 def main():
-    #gazetteers = load_gazetteers(lowercased=False)
-    gazetteers = {'female_names': ['Ona','Laura','Dafne'], 'male_names': ['Joan','Bernat','Lluís'], 'surnames': ['Sánchez','García','Oró', 'Lima']}
+    gazetteers = load_gazetteers(lowercased=False)
     random_names = create_names(gazetteers)
-    print(random_names)
     write_files(random_names)
     
 if __name__ == "__main__":
