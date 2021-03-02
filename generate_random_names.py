@@ -3,12 +3,25 @@ Given a list of male and female names, creates 10k random names composed of:
 name + first name + second name
 Author: ona.degibert@bsc.es
 """
+import random
+import os
 
-from insert_gazetteers import *
+def load_gazetteers():
+    # Open files
+    path = 'gazetteers'
+    gazetteers = dict()
+    for filename in os.listdir(path):
+        with open(os.path.join(path, filename), 'r') as fn: # open in readonly mode
+            gazetteers_list = fn.read().splitlines()
+            gazetteers[filename.replace('.txt','')] = gazetteers_list
+    return gazetteers
 
 def create_names(gazetteers):
     random_names = []
     all_names = gazetteers['female_names']+gazetteers['male_names']
+    print(len(gazetteers['female_names']))
+    print(len(gazetteers['female_names']))
+    print(len(all_names))
     surnames = gazetteers['surnames']
     surnames_counts = [(surname,0) for surname in surnames]
     count = 0
@@ -20,6 +33,7 @@ def create_names(gazetteers):
             # check if there's still some available, otherwise, increase count
             if count not in counts:
                 count += 1
+            print(count)
             # select only surnames with the correspondent count
             available_surnames = [surname_tuple[0] for surname_tuple in surnames_counts if surname_tuple[1] == count]
             # choose one randomly and increase count
@@ -37,7 +51,7 @@ def write_files(list):
             fn.write(line+'\n')
 
 def main():
-    gazetteers = load_gazetteers(lowercased=False)
+    gazetteers = load_gazetteers()
     random_names = create_names(gazetteers)
     write_files(random_names)
     
