@@ -19,10 +19,6 @@ def load_gazetteers():
 def create_names(gazetteers):
     random_names = []
     all_names = gazetteers['female_names']+gazetteers['male_names']
-    print(len(gazetteers['female_names']))
-    print(len(gazetteers['female_names']))
-    print(len(all_names))
-    surnames = gazetteers['surnames']
     surnames_counts = [(surname,0) for surname in surnames]
     count = 0
     for name in all_names:
@@ -33,7 +29,6 @@ def create_names(gazetteers):
             # check if there's still some available, otherwise, increase count
             if count not in counts:
                 count += 1
-            print(count)
             # select only surnames with the correspondent count
             available_surnames = [surname_tuple[0] for surname_tuple in surnames_counts if surname_tuple[1] == count]
             # choose one randomly and increase count
