@@ -1,6 +1,11 @@
 """
 Given a list of male and female names, creates 10k random names composed of:
 name + first name + second name
+
+It expects a folder called 'gazeteers' with three files within it:
+- female_names.txt
+- male_names.txt
+- surnames.txt
 Author: ona.degibert@bsc.es
 """
 import random
