@@ -10,6 +10,7 @@ Author: ona.degibert@bsc.es
 """
 import random
 import os
+from collections import Counter
 
 def load_gazetteers():
     # Open files
@@ -24,7 +25,7 @@ def load_gazetteers():
 def create_names(gazetteers):
     random_names = []
     all_names = gazetteers['female_names']+gazetteers['male_names']
-    surnames_counts = [(surname,0) for surname in surnames]
+    surnames_counts = [(surname,0) for surname in gazetteers['surnames']]
     count = 0
     for name in all_names:
         surnames = []
@@ -45,6 +46,14 @@ def create_names(gazetteers):
         random_names.append(random_name)
     return random_names
 
+def print_stats(names):
+    names_len = [len(name.split()) for name in names]
+    counts = Counter(names_len)
+    total = sum(counts.values())
+    print('\t'.join(['LEN','COUNT','%']))
+    for each_len in sorted(counts):
+        print('\t'.join([str(each_len),str(counts[each_len]),str(counts[each_len]*100/total)]))
+
 def write_files(list):
     with open('10k_random_names.txt', 'w') as fn: 
         for line in list:
@@ -53,7 +62,8 @@ def write_files(list):
 def main():
     gazetteers = load_gazetteers()
     random_names = create_names(gazetteers)
-    write_files(random_names)
+    print_stats(random_names)
+    #write_files(random_names)
     
 if __name__ == "__main__":
         main()
