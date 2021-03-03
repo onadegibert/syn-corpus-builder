@@ -52,7 +52,9 @@ def choose_gazetteers(previous_token,gazetteers):
     possible_male_names = [['m','s','s']] 
     possible_female_names = [['f','s','s']]
     all_possible = possible_female_names + possible_male_names
-    if previous_token[-1] == 'a':
+    if previous_token == 'empresa':
+        name = ['s']
+    elif previous_token[-1] == 'a':
         name = random.choice(possible_female_names)
     elif previous_token[-1] == 'o':
         name = random.choice(possible_male_names)
