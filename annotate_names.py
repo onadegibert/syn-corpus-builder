@@ -71,8 +71,8 @@ def add_person_annotations(original_files, gazetteers):
     # add person tags
     annotated_files = []
     mapped_tags = {'f':'given name - female','m':'given name - male','s':'family name'}
-    all_used_names = []
     for original_file in original_files:
+        all_used_names = []
         sentences = original_file.splitlines()
         annotated_file = sentences[0:4]
         annotation_count = 1
