@@ -185,11 +185,12 @@ def fix_annotation_counts(fixed_files):
                         tag = re.sub('(\d+)', str(tag_level_1), tag, 1)
                         tag = tag.split("|")[0]+'|'+re.sub('(\d+)', str(tag_level_2), tag.split("|")[1])
                     else:
-                        tag_level_1 = re_tags_number.findall(tag_id_str)
+                        tag_level_1_list = re_tags_number.findall(tag_id_str)
+                        tag_level_1 = int(tag_level_1_list[0]) + increased_tag_count
                         tag_name_level_1 = re_tags_name.findall(tag)
-                        tag_id = int(tag_level_1[0]) + increased_tag_count
-                        tag_id_str = "*[" + str(tag_id) + "]"
-                        tag = re.sub('\d+', str(tag_id), tag)
+                        tag_id_str = "*[" + str(tag_level_1) + "]"
+                        tag = re.sub('\d+', str(tag_level_1), tag)
+                        tag_level_2 = tag_level_1
                     last_tag_id = tag_level_2
                     last_name_level_1 = tag_name_level_1
                     last_name_level_2 = tag_name_level_2
