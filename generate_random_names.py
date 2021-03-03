@@ -63,7 +63,7 @@ def main():
     gazetteers = load_gazetteers()
     random_names = create_names(gazetteers)
     print_stats(random_names)
-    #write_files(random_names)
+    write_files(random_names)
     
 if __name__ == "__main__":
         main()
