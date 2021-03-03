@@ -109,6 +109,7 @@ def fix_onset_offset(annotated_files):
     fixed_files = []
     for annotated_file in annotated_files:
         fixed_file = annotated_file[0:5]
+        string_file = ' '.join(re.findall('#Text=.*\n','\n'.join(annotated_file))).replace('#Text=','')
         last_offset = 0
         previous_token = '"'
         for line in annotated_file[5:]:
@@ -116,10 +117,13 @@ def fix_onset_offset(annotated_files):
             if line != ''  and line[0].isdigit():
                 sen_token_id, onset_offset, token, tag_id_str, tag, empty_string = line.split('\t')
                 onset, offset = onset_offset.split('-')
-                if token in '!"[]#$%&()*+,-./:;<=>?@^_`{|}~]' or previous_token in '"[]#$%&()*+-/:;<=>?@^_`{|}~]':
-                    onset = last_offset
-                else:
-                    onset = last_offset + 1
+                onset = string_file.find(token)
+                replace_string = 'X'*len(token)
+                string_file = string_file.replace(token,replace_string,1)
+              #  if token in '!"[]#$%&()*+,-./:;<=>?@^_`{|}~]' or previous_token in '"[]#$%&()*+-/:;<=>?@^_`{|}~]':
+              #      onset = last_offset
+              #  else:
+              #      onset = last_offset + 1
                 offset = onset + len(token)
                 onset_offset = '-'.join([str(onset),str(offset)])
                 tokens_processed.append('\t'.join([sen_token_id,onset_offset,token,tag_id_str,tag]))
@@ -128,7 +132,8 @@ def fix_onset_offset(annotated_files):
                 previous_token = token
             elif line.startswith('#'):
                 fixed_file.append(line)
-                last_offset += 2
+                last_offset += 1
+                previous_token = '.'
             else:
                 fixed_file.append(line)
         fixed_files.append(fixed_file)
@@ -141,7 +146,6 @@ def fix_annotation_counts(fixed_files):
         index_person = [idx for idx, s in enumerate(fixed_file) if 'PERSON' in s][0]
         final_file = fixed_file[0:index_person]
         re_tags_number_tag = re.compile('\*\[\d+\]')
-        print(final_file)
         all_used_tag_ids = re_tags_number_tag.findall(' '.join(final_file))
         if not all_used_tag_ids:
             last_tag_id = 0
