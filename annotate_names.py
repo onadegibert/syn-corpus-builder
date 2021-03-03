@@ -49,8 +49,8 @@ def load_gazetteers(lowercased):
 def choose_gazetteers(previous_token,gazetteers):
     token = ""
     # m for male, f for female and s for surname
-    possible_male_names = [['m'],['m','s']] 
-    possible_female_names = [['f'],['f','s']]
+    possible_male_names = [['m','s','s']] 
+    possible_female_names = [['f','s','s']]
     all_possible = possible_female_names + possible_male_names
     if previous_token[-1] == 'a':
         name = random.choice(possible_female_names)
@@ -120,10 +120,6 @@ def fix_onset_offset(annotated_files):
                 onset = string_file.find(token)
                 replace_string = 'X'*len(token)
                 string_file = string_file.replace(token,replace_string,1)
-              #  if token in '!"[]#$%&()*+,-./:;<=>?@^_`{|}~]' or previous_token in '"[]#$%&()*+-/:;<=>?@^_`{|}~]':
-              #      onset = last_offset
-              #  else:
-              #      onset = last_offset + 1
                 offset = onset + len(token)
                 onset_offset = '-'.join([str(onset),str(offset)])
                 tokens_processed.append('\t'.join([sen_token_id,onset_offset,token,tag_id_str,tag]))
@@ -169,7 +165,10 @@ def fix_annotation_counts(fixed_files):
                         tag_level_2 = int(tag_level_2)
                         # PERSON ENTITITES
                         if tag_name_level_2 == 'family name': #means it's a person annotation
-                            tag_level_1 = last_tag_id - 1
+                            if last_name_level_2 == 'family name': # second surname
+                                tag_level_1 = last_tag_id - 2
+                            else:
+                                tag_level_1 = last_tag_id - 1
                             tag_level_2 = last_tag_id + 1
                             increased_tag_count += 1
                         elif tag_name_level_2.startswith('given name'):
