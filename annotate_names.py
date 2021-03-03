@@ -71,9 +71,10 @@ def add_person_annotations(original_files, gazetteers):
     # add person tags
     annotated_files = []
     mapped_tags = {'f':'given name - female','m':'given name - male','s':'family name'}
+    all_used_names = []
     for original_file in original_files:
         sentences = original_file.splitlines()
-        annotated_file = sentences[0:3]
+        annotated_file = sentences[0:4]
         annotation_count = 1
         for line in sentences[4:]:
             tokens_processed = []
@@ -81,6 +82,7 @@ def add_person_annotations(original_files, gazetteers):
                 sen_token_id, onset_offset, token, tag_id_str, tag, empty_string = line.split('\t')
                 if token == 'XXXXX':
                     tokens, tags = choose_gazetteers(previous_token, gazetteers)
+                    all_used_names.append(tokens)
                     count = 0
                     for token in tokens:
                         tag_id_str = "*[" + str(annotation_count) + "]|*["+ str(annotation_count) + "]"
@@ -94,7 +96,11 @@ def add_person_annotations(original_files, gazetteers):
                 previous_token = token
             else:
                 annotated_file.append(line)
-        annotated_files.append(annotated_file)
+        # Replace XXXXX in text
+        annotated_file_str = '|||'.join(annotated_file)
+        for each_name in all_used_names:
+            annotated_file_str = annotated_file_str.replace('XXXXX',' '.join(each_name), 1)
+        annotated_files.append(annotated_file_str.split('|||'))
         print("Files processed: ", len(annotated_files))
     return annotated_files
 
@@ -102,14 +108,15 @@ def fix_onset_offset(annotated_files):
     # fix onset_offsets
     fixed_files = []
     for annotated_file in annotated_files:
-        fixed_file = annotated_file[0:3]
+        fixed_file = annotated_file[0:5]
         last_offset = 0
-        for line in annotated_file[4:]:
+        previous_token = '"'
+        for line in annotated_file[5:]:
             tokens_processed = []
             if line != ''  and line[0].isdigit():
                 sen_token_id, onset_offset, token, tag_id_str, tag, empty_string = line.split('\t')
                 onset, offset = onset_offset.split('-')
-                if token in '!"[]#$%&()*+,-./:;<=>?@^_`{|}~]':
+                if token in '!"[]#$%&()*+,-./:;<=>?@^_`{|}~]' or previous_token in '"[]#$%&()*+-/:;<=>?@^_`{|}~]':
                     onset = last_offset
                 else:
                     onset = last_offset + 1
@@ -118,6 +125,10 @@ def fix_onset_offset(annotated_files):
                 tokens_processed.append('\t'.join([sen_token_id,onset_offset,token,tag_id_str,tag]))
                 fixed_file.extend(tokens_processed)
                 last_offset = offset
+                previous_token = token
+            elif line.startswith('#'):
+                fixed_file.append(line)
+                last_offset += 2
             else:
                 fixed_file.append(line)
         fixed_files.append(fixed_file)
@@ -146,7 +157,6 @@ def fix_annotation_counts(fixed_files):
                     if len(tag.split("|")) > 1: # there are two tags
                         tag_level_1, tag_level_2 = re_tags_number.findall(tag_id_str)
                         tag_name_level_1, tag_name_level_2 = re_tags_name.findall(tag)
-                        print(tag_name_level_1)
                         tag_level_1 = int(tag_level_1)
                         tag_level_2 = int(tag_level_2)
                         # PERSON ENTITITES
@@ -165,10 +175,11 @@ def fix_annotation_counts(fixed_files):
                         tag_id_str = "*[" + str(tag_level_1) + "]|*["+ str(tag_level_2) + "]"
                         tag_id = tag_level_2
                         tag = re.sub('(\d+)', str(tag_level_1), tag, 1)
-                        tag = tag.split("|")[0]+re.sub('(\d+)', str(tag_level_2), tag.split("|")[1])
+                        tag = tag.split("|")[0]+'|'+re.sub('(\d+)', str(tag_level_2), tag.split("|")[1])
                     else:
+                        tag_level_1 = re_tags_number.findall(tag_id_str)
                         tag_name_level_1 = re_tags_name.findall(tag)
-                        tag_id = int(last_tag_id) + 1
+                        tag_id = int(tag_level_1[0]) + increased_tag_count
                         tag_id_str = "*[" + str(tag_id) + "]"
                         tag = re.sub('\d+', str(tag_id), tag)
                     last_tag_id = tag_level_2
