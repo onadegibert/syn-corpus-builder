@@ -52,7 +52,7 @@ def choose_gazetteers(previous_token,gazetteers):
     possible_male_names = [['m','s','s']] 
     possible_female_names = [['f','s','s']]
     all_possible = possible_female_names + possible_male_names
-    if previous_token == 'empresa':
+    if previous_token in ['empresa','constructora']:
         name = ['s']
     elif previous_token[-1] == 'a':
         name = random.choice(possible_female_names)
@@ -87,9 +87,14 @@ def add_person_annotations(original_files, gazetteers):
                     all_used_names.append(tokens)
                     count = 0
                     for token in tokens:
-                        tag_id_str = "*[" + str(annotation_count) + "]|*["+ str(annotation_count) + "]"
-                        tag = "PERSON[" + str(annotation_count) + "]|" + mapped_tags[tags[count]] + "["+ str(annotation_count) + "]"
-                        tokens_processed.append('\t'.join([sen_token_id,onset_offset,token,tag_id_str,tag,'']))
+                        if tags[count] == "s" and count == 0:
+                            tag_id_str = "*"
+                            tag = "ORGANISATION"
+                            tokens_processed.append('\t'.join([sen_token_id,onset_offset,token,tag_id_str,tag,'']))
+                        else:
+                            tag_id_str = "*[" + str(annotation_count) + "]|*["+ str(annotation_count) + "]"
+                            tag = "PERSON[" + str(annotation_count) + "]|" + mapped_tags[tags[count]] + "["+ str(annotation_count) + "]"
+                            tokens_processed.append('\t'.join([sen_token_id,onset_offset,token,tag_id_str,tag,'']))
                         count += 1
                     annotated_file.extend(tokens_processed)
                     annotation_count += 1
