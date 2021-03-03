@@ -141,8 +141,12 @@ def fix_annotation_counts(fixed_files):
         index_person = [idx for idx, s in enumerate(fixed_file) if 'PERSON' in s][0]
         final_file = fixed_file[0:index_person]
         re_tags_number_tag = re.compile('\*\[\d+\]')
+        print(final_file)
         all_used_tag_ids = re_tags_number_tag.findall(' '.join(final_file))
-        last_tag_id = re.findall('\d+',all_used_tag_ids[-1])[0]
+        if not all_used_tag_ids:
+            last_tag_id = 0
+        else:
+            last_tag_id = re.findall('\d+',all_used_tag_ids[-1])[0]
         last_tag_id = int(last_tag_id)
         last_name_level_1 = ''
         last_name_level_2 = ''
