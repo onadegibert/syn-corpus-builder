@@ -99,6 +99,10 @@ def add_person_annotations(original_files, gazetteers):
                     annotated_file.extend(tokens_processed)
                     annotation_count += 1
                 else:
+                    if token == 'de' and 'DATE' in tag:
+                        tag_id_str = tag_id_str.split("|")[0]
+                        tag = tag.split("|")[0]
+                        line = '\t'.join([sen_token_id,onset_offset,token,tag_id_str,tag,''])
                     annotated_file.append(line)
                 previous_token = token
             else:
