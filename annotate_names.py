@@ -178,9 +178,10 @@ def fix_annotation_counts(fixed_files):
                         if tag_name_level_2 == 'family name': #means it's a person annotation
                             if last_name_level_2 == 'family name': # second surname
                                 tag_level_1 = last_tag_id - 2
+                                tag_level_2 = last_tag_id
                             else:
                                 tag_level_1 = last_tag_id - 1
-                            tag_level_2 = last_tag_id + 1
+                                tag_level_2 = last_tag_id + 1
                             increased_tag_count += 1
                         elif tag_name_level_2.startswith('given name'):
                             tag_level_1 = last_tag_id + 1
