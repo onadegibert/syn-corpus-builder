@@ -1,8 +1,8 @@
 """
-Creates a synthethic corpus in WebAnno 3.2 TSV Format
+Creates a synthethic corpus in WebAnno TSV v3.2 Format
 Created for Spanish, feel free to add your own gazetteers
-If there's any annotation you want to reuse, it shouldn't be punctuation!!! e.g XXXXXX
-1. open file and where is ... random name + tal
+It expects pre-annotated files in  WebAnno TSV v3.2 Format with some pre-annotations.
+It inserts name + surname + surname where there are XXXXX in the text.
 Author: ona.degibert@bsc.es
 """
 
