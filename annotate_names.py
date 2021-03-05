@@ -52,8 +52,10 @@ def choose_gazetteers(previous_token,gazetteers):
     possible_male_names = [['m','s','s']] 
     possible_female_names = [['f','s','s']]
     all_possible = possible_female_names + possible_male_names
-    if previous_token.lower() in ['empresa','constructora','colegio','público']:
+    if previous_token.lower() in ['empresa','constructora']:
         name = ['s']
+    elif previous_token.lower() in ['colegio','público']:
+        name = random.choice([['m','s'],['f','s']])
     elif previous_token[-1] == 'a':
         name = random.choice(possible_female_names)
     elif previous_token[-1] == 'o':
@@ -157,9 +159,9 @@ def fix_annotation_counts(fixed_files):
         if not all_used_tag_ids:
             last_tag_id = 0
         else:
-            last_tag_id = max(re.findall('\d+',' '.join(all_used_tag_ids)))
+            used_tag_ids_int = [int(id) for id in re.findall('\d+',' '.join(all_used_tag_ids))]
+            last_tag_id = max(used_tag_ids_int)
         last_tag_id = int(last_tag_id)
-        print(last_tag_id)
         last_name_level_1 = ''
         last_name_level_2 = ''
         increased_tag_count = 0
