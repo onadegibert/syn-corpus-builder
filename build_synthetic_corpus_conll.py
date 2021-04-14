@@ -39,18 +39,13 @@ def get_files(directory):
             files.append([file_path, file])
     return(files)
 
-def load_gazetteers(lowercased):
+def load_gazetteers():
     # Open files
     path = 'gazetteers'
     gazetteers = dict()
     for filename in os.listdir(path):
         with open(os.path.join(path, filename), 'r') as fn: # open in readonly mode
-            # only take one token gazetteers
-            if lowercased:
-                one_token_gazetteers = [token.lower() for token in fn.read().splitlines() if len(token.split()) == 1]
-            else:
-                one_token_gazetteers = [token for token in fn.read().splitlines() if len(token.split()) == 1]
-            gazetteers[filename.replace('.txt','')] = one_token_gazetteers
+            gazetteers[filename.replace('.txt','')] = [token for token in fn.read().splitlines()]
     return gazetteers
 
 def choose_gazetteers(previous_token,gazetteers):
@@ -71,7 +66,6 @@ def choose_gazetteers(previous_token,gazetteers):
     else:
         name = random.choice([['m','s','s'], ['f','s','s']])
     for gender in name:
-        #TODO add weights
         if gender == 'f':
             weights = reversed(range(1,len(gazetteers['female_names'])+1))
             token = random.choices(gazetteers['female_names'], weights=weights, k=1)[0]
@@ -81,7 +75,11 @@ def choose_gazetteers(previous_token,gazetteers):
         if gender == 's':
             weights = reversed(range(1,len(gazetteers['surnames'])+1))
             token = random.choices(gazetteers['surnames'], weights=weights, k=1)[0]
-        tokens.append([token, gender])
+        if len(token.split()) > 1: #if there's a multitoken
+            for word in token.split():
+                tokens.append([word, gender])
+        else:
+            tokens.append([token, gender])
         string = string + token + ' '
     return tokens, entity_type, string
 
@@ -138,11 +136,11 @@ def main(args):
     if not os.path.exists(output):
             os.makedirs(output)
     files = get_files(directory)
-    gazetteers = load_gazetteers(lowercased="True")
+    gazetteers = load_gazetteers()
     for file_path, filename in files:
         read_file = open(file_path, 'r')
         processed_file = insert_entities(read_file, gazetteers)
-        write_file(processed_file, output, filename)
+       # write_file(processed_file, output, filename)
 
 if __name__ == "__main__":
     args = parse_arguments()
