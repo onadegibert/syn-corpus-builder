@@ -73,11 +73,14 @@ def choose_gazetteers(previous_token,gazetteers):
     for gender in name:
         #TODO add weights
         if gender == 'f':
-            token = random.choice(gazetteers['female_names'][:500])
+            weights = reversed(range(1,len(gazetteers['female_names'])+1))
+            token = random.choices(gazetteers['female_names'], weights=weights, k=1)[0]
         if gender == 'm':
-            token = random.choice(gazetteers['male_names'][:500])
+            weights = reversed(range(1,len(gazetteers['male_names'])+1))
+            token = random.choices(gazetteers['male_names'], weights=weights, k=1)[0]
         if gender == 's':
-            token = random.choice(gazetteers['surnames'][:500])
+            weights = reversed(range(1,len(gazetteers['surnames'])+1))
+            token = random.choices(gazetteers['surnames'], weights=weights, k=1)[0]
         tokens.append([token, gender])
         string = string + token + ' '
     return tokens, entity_type, string
