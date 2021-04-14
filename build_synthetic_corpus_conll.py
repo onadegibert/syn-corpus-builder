@@ -1,0 +1,146 @@
+"""
+Creates a synthethic corpus in CoNLL Format
+Created for Spanish, feel free to add your own gazetteers
+If there's any annotation you want to reuse, it shouldn't be punctuation!!! e.g XXXXXX
+1. open file and where is ... random name + tal
+Author: ona.degibert@bsc.es
+"""
+
+import argparse
+import os
+import re
+import itertools
+from annotate_token import *
+import random
+
+class Token():
+    def __init__(self, line, previous_token, previous_offset):
+        self.string, self.level1, self.level2, self.onset_offset = line.split('\t')
+        onset, offset = self.onset_offset.replace('(','').replace(')','').split(',')
+        self.onset, self.offset = int(onset), int(offset.strip())
+        self.previous_token = previous_token
+        self.previous_offset = previous_offset
+
+def parse_arguments():
+    """Read command line parameters."""
+    parser = argparse.ArgumentParser(description="Script to create a syntethic semi-annotated corpus")
+    parser.add_argument('-d', '--directory',
+                        help="Corpus directory")
+    parser.add_argument('-o', '--output',
+                        help="Output directory")
+    args = parser.parse_args()
+    return args.directory, args.output
+
+def get_files(directory):
+    files = []
+    for r, d, f in os.walk(directory):
+        for file in f:
+            file_path = os.path.join(r, file)
+            files.append([file_path, file])
+    return(files)
+
+def load_gazetteers(lowercased):
+    # Open files
+    path = 'gazetteers'
+    gazetteers = dict()
+    for filename in os.listdir(path):
+        with open(os.path.join(path, filename), 'r') as fn: # open in readonly mode
+            # only take one token gazetteers
+            if lowercased:
+                one_token_gazetteers = [token.lower() for token in fn.read().splitlines() if len(token.split()) == 1]
+            else:
+                one_token_gazetteers = [token for token in fn.read().splitlines() if len(token.split()) == 1]
+            gazetteers[filename.replace('.txt','')] = one_token_gazetteers
+    return gazetteers
+
+def choose_gazetteers(previous_token,gazetteers):
+    tokens = []
+    entity_type = 'person'
+    string = ''
+    # m for male, f for female and s for surname
+    if previous_token.lower() in ['empresa','constructora']:
+        name = ['s']
+        entity_type = 'company'
+    elif previous_token.lower() in ['colegio','público', 'de']:
+        name = random.choice([['m','s'],['f','s']])
+        entity_type = 'school'
+    elif previous_token[-1] == 'a':
+        name = ['f','s','s']
+    elif previous_token[-1] == 'o':
+        name = ['m','s','s']
+    else:
+        name = random.choice([['m','s','s'], ['f','s','s']])
+    for gender in name:
+        #TODO add weights
+        if gender == 'f':
+            token = random.choice(gazetteers['female_names'][:500])
+        if gender == 'm':
+            token = random.choice(gazetteers['male_names'][:500])
+        if gender == 's':
+            token = random.choice(gazetteers['surnames'][:500])
+        tokens.append([token, gender])
+        string = string + token + ' '
+    return tokens, entity_type, string
+
+def insert_entities(read_file, gazetteers):
+    final_file = []
+    previous_token = ""
+    previous_offset = ""
+    increased_span = 0
+    mapped_tags = {'f':'given name - female','m':'given name - male','s':'family name'}
+    for line in read_file:
+        token = Token(line, previous_token, previous_offset)
+        if token.string == 'XXXXXX':
+            new_tokens, entity_type, string = choose_gazetteers(token.previous_token,gazetteers)
+            for new_token, gender in new_tokens:
+                token.string = new_token.capitalize()
+                if entity_type == 'company':
+                    token.level1 = 'B-ORGANISATION'
+                if entity_type == 'school':
+                    if token.level1 == 'O': #first token in string
+                        token.level1 = 'B-ORGANISATION'
+                    else:
+                        token.level1 = 'I-ORGANISATION'
+                if entity_type == 'person':
+                    if token.level1 == 'O': #first token in string
+                        token.level1 = 'B-PERSON'
+                        token.level2 = 'B-'+mapped_tags[gender]
+                    else:
+                        token.level1 = 'I-PERSON'
+                        token.level2 = 'I-'+mapped_tags[gender]
+                token.onset = token.previous_offset + 1
+                token.offset = token.onset + len(new_token)
+                token.previous_offset = token.offset
+                token.onset_offset = (token.onset, token.offset)
+                final_file.append('\t'.join([token.string, token.level1, token.level2, str(token.onset_offset)]))
+            increased_span = increased_span + len(string) - 7 # we delete the length of XXXXXX
+        else:
+            token.onset = token.onset + increased_span
+            token.offset = token.offset + increased_span
+            token.onset_offset = (token.onset, token.offset)
+            final_file.append('\t'.join([token.string, token.level1, token.level2, str(token.onset_offset)]))
+        previous_token = token.string
+        previous_offset = token.offset
+    return final_file
+
+
+def write_file(processed_file, output, filename):
+    with open(os.path.join(output, filename.replace('.txt_result','_syn') ), 'w') as fn: # open in readonly mode
+            for line in processed_file:
+                fn.write(line+'\n')
+
+def main(args):
+    directory, output = args
+    #create output folder if it doesn't exist
+    if not os.path.exists(output):
+            os.makedirs(output)
+    files = get_files(directory)
+    gazetteers = load_gazetteers(lowercased="True")
+    for file_path, filename in files:
+        read_file = open(file_path, 'r')
+        processed_file = insert_entities(read_file, gazetteers)
+        write_file(processed_file, output, filename)
+
+if __name__ == "__main__":
+    args = parse_arguments()
+    main(args)
