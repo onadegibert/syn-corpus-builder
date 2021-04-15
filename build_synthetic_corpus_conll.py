@@ -96,6 +96,7 @@ def insert_entities(read_file, gazetteers):
         if token.string == 'XXXXXX':
             new_tokens, entity_type, string = choose_gazetteers(token.previous_token,gazetteers)
             bio_tag = 'B' #only first token with B tag
+            first_surname = 'yes'
             for new_token, gender in new_tokens:
                 token.string = new_token.capitalize()
                 if entity_type == 'company' or entity_type =='school':
@@ -103,6 +104,9 @@ def insert_entities(read_file, gazetteers):
                         token.level2 = 'O'
                 if entity_type == 'person':
                         token.level1 = bio_tag+'-PERSON'
+                        if first_surname == 'yes' and mapped_tags[gender] == 'family name': # reset biotag to B for family names
+                            bio_tag = 'B'
+                            first_surname = 'no'
                         token.level2 = bio_tag+'-'+mapped_tags[gender]
                 token.onset = token.previous_offset + 1
                 token.offset = token.onset + len(new_token)
