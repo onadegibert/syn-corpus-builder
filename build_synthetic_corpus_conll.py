@@ -9,6 +9,7 @@ Author: ona.degibert@bsc.es
 import argparse
 import os
 import random
+import time
 
 class Token():
     def __init__(self, line, previous_token, previous_offset):
@@ -138,5 +139,7 @@ def main(args):
         write_file(processed_file, output, filename)
 
 if __name__ == "__main__":
+    start_time = time.time()
     args = parse_arguments()
     main(args)
+    print("--- %s seconds ---" % (time.time() - start_time))
