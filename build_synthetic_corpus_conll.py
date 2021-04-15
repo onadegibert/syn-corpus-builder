@@ -12,6 +12,7 @@ import re
 import itertools
 from annotate_token import *
 import random
+import numpy as np
 
 class Token():
     def __init__(self, line, previous_token, previous_offset):
@@ -65,15 +66,14 @@ def choose_gazetteers(previous_token,gazetteers):
         name = ['m','s','s']
     else:
         name = random.choice([['m','s','s'], ['f','s','s']])
+    #to do implement zipf's law https://www.codedrome.com/zipfs-law-in-python/
+    weights =  [5000/i for i in range(1,5001)]
     for gender in name:
         if gender == 'f':
-            weights = reversed(range(1,len(gazetteers['female_names'])+1))
             token = random.choices(gazetteers['female_names'], weights=weights, k=1)[0]
         if gender == 'm':
-            weights = reversed(range(1,len(gazetteers['male_names'])+1))
             token = random.choices(gazetteers['male_names'], weights=weights, k=1)[0]
         if gender == 's':
-            weights = reversed(range(1,len(gazetteers['surnames'])+1))
             token = random.choices(gazetteers['surnames'], weights=weights, k=1)[0]
         if len(token.split()) > 1: #if there's a multitoken
             for word in token.split():
@@ -140,7 +140,7 @@ def main(args):
     for file_path, filename in files:
         read_file = open(file_path, 'r')
         processed_file = insert_entities(read_file, gazetteers)
-       # write_file(processed_file, output, filename)
+        write_file(processed_file, output, filename)
 
 if __name__ == "__main__":
     args = parse_arguments()
