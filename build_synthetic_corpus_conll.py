@@ -101,11 +101,14 @@ def insert_entities(read_file, gazetteers):
                 token.string = new_token.capitalize()
                 if entity_type == 'company':
                     token.level1 = 'B-ORGANISATION'
+                    token.level2 = 'O'
                 if entity_type == 'school':
                     if token.level1 == 'O': #first token in string
                         token.level1 = 'B-ORGANISATION'
+                        token.level2 = 'O'
                     else:
                         token.level1 = 'I-ORGANISATION'
+                        token.level2 = 'O'
                 if entity_type == 'person':
                     if token.level1 == 'O': #first token in string
                         token.level1 = 'B-PERSON'
