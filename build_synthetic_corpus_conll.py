@@ -1,8 +1,7 @@
 """
 Creates a synthethic corpus in CoNLL Format
 Created for Spanish, feel free to add your own gazetteers
-If there's any annotation you want to reuse, it shouldn't be punctuation!!! e.g XXXXXX
-1. open file and where is ... random name + tal
+This script expects a file in CoNLL Format and will introduce PERSON tags for tokens such as 'XXXXXX'
 Author: ona.degibert@bsc.es
 """
 
@@ -54,19 +53,24 @@ def choose_gazetteers(previous_token,gazetteers):
     entity_type = 'person'
     string = ''
     # m for male, f for female and s for surname
+    # if it's a company we only take a surname: empresa Torras
     if previous_token.lower() in ['empresa','constructora']:
         name = ['s']
         entity_type = 'company'
+    # if it's a school name we only take a name and surname: colegio Joan Torras
     elif previous_token.lower() in ['colegio','público', 'de']:
         name = random.choice([['m','s'],['f','s']])
         entity_type = 'school'
+    # if the word ends in 'a', take a femenine noun
     elif previous_token[-1] == 'a':
         name = ['f','s','s']
+    # if the word ends in 'o', take a masculine noun
     elif previous_token[-1] == 'o':
         name = ['m','s','s']
+    # otherwise, choose randomly the gender
     else:
         name = random.choice([['m','s','s'], ['f','s','s']])
-    #to do implement zipf's law https://www.codedrome.com/zipfs-law-in-python/
+    # follow a zipf like distribution for the weights
     weights =  [5000/i for i in range(1,5001)]
     for gender in name:
         if gender == 'f':
