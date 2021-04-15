@@ -1,4 +1,5 @@
 """
+https://github.com/onadegibert/syn-corpus-builder/blob/main/build_synthetic_corpus_conll.py
 Creates a synthethic corpus in CoNLL Format
 Created for Spanish, feel free to add your own gazetteers
 This script expects a file in CoNLL Format and will introduce PERSON tags for tokens such as 'XXXXXX'
@@ -99,10 +100,7 @@ def insert_entities(read_file, gazetteers):
             new_tokens, entity_type, string = choose_gazetteers(token.previous_token,gazetteers)
             for new_token, gender in new_tokens:
                 token.string = new_token.capitalize()
-                if entity_type == 'company':
-                    token.level1 = 'B-ORGANISATION'
-                    token.level2 = 'O'
-                if entity_type == 'school':
+                if entity_type == 'company' or entity_type =='school':
                     if token.level1 == 'O': #first token in string
                         token.level1 = 'B-ORGANISATION'
                         token.level2 = 'O'
