@@ -8,11 +8,7 @@ Author: ona.degibert@bsc.es
 
 import argparse
 import os
-import re
-import itertools
-from annotate_token import *
 import random
-import numpy as np
 
 class Token():
     def __init__(self, line, previous_token, previous_offset):
@@ -98,27 +94,21 @@ def insert_entities(read_file, gazetteers):
         token = Token(line, previous_token, previous_offset)
         if token.string == 'XXXXXX':
             new_tokens, entity_type, string = choose_gazetteers(token.previous_token,gazetteers)
+            bio_tag = 'B' #only first token with B tag
             for new_token, gender in new_tokens:
                 token.string = new_token.capitalize()
                 if entity_type == 'company' or entity_type =='school':
-                    if token.level1 == 'O': #first token in string
-                        token.level1 = 'B-ORGANISATION'
-                        token.level2 = 'O'
-                    else:
-                        token.level1 = 'I-ORGANISATION'
+                        token.level1 = bio_tag+'-ORGANISATION'
                         token.level2 = 'O'
                 if entity_type == 'person':
-                    if token.level1 == 'O': #first token in string
-                        token.level1 = 'B-PERSON'
-                        token.level2 = 'B-'+mapped_tags[gender]
-                    else:
-                        token.level1 = 'I-PERSON'
-                        token.level2 = 'I-'+mapped_tags[gender]
+                        token.level1 = bio_tag+'-PERSON'
+                        token.level2 = bio_tag+'-'+mapped_tags[gender]
                 token.onset = token.previous_offset + 1
                 token.offset = token.onset + len(new_token)
                 token.previous_offset = token.offset
                 token.onset_offset = (token.onset, token.offset)
                 final_file.append('\t'.join([token.string, token.level1, token.level2, str(token.onset_offset)]))
+                bio_tag = 'I' # next tokens with I tag
             increased_span = increased_span + len(string) - 7 # we delete the length of XXXXXX
         else:
             token.onset = token.onset + increased_span
