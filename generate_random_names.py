@@ -22,29 +22,24 @@ def load_gazetteers():
             gazetteers[filename.replace('.txt','')] = gazetteers_list
     return gazetteers
 
+def random_zipf(list):
+    # follow a zipf like distribution for the weights
+    weights =  [5000/i for i in range(1,5001)]
+    return random.choices(list, weights=weights, k=5000)
+
 def create_names(gazetteers):
-    random_names = []
-    all_names = gazetteers['female_names']+gazetteers['male_names']
-    surnames_counts = [(surname,0) for surname in gazetteers['surnames']]
-    count = 0
-    for name in all_names:
-        surnames = []
-        for each_surname in range(2): # we need to generate two surnames
-            # get all counts
-            counts = [surname_tuple[1] for surname_tuple in surnames_counts if surname_tuple[1] == count]
-            # check if there's still some available, otherwise, increase count
-            if count not in counts:
-                count += 1
-            # select only surnames with the correspondent count
-            available_surnames = [surname_tuple[0] for surname_tuple in surnames_counts if surname_tuple[1] == count]
-            # choose one randomly and increase count
-            name_surname = random.choice(available_surnames)
-            index = surnames_counts.index((name_surname,count))
-            surnames_counts[index] = (name_surname,count+1)
-            surnames.append(name_surname)
-        random_name = ' '.join([name] + surnames)
-        random_names.append(random_name)
-    return random_names
+    male_names = random_zipf(gazetteers['male_names'])
+    female_names = random_zipf(gazetteers['female_names'])
+    names = male_names + female_names
+    first_surnames_m = random_zipf(gazetteers['surnames'])
+    second_surnames_m = random_zipf(gazetteers['surnames'])
+    first_surnames_f = random_zipf(gazetteers['surnames'])
+    second_surnames_f = random_zipf(gazetteers['surnames'])
+    random_names_m = zip(male_names, first_surnames_m, second_surnames_m)
+    random_names_f = zip(female_names, first_surnames_f, second_surnames_f)
+    random_names_list = [' '.join(name) for name in random_names_m] + [' '.join(name) for name in random_names_f]
+    # això genera noms repetits l'ideal seria no repetir noms. Potser generar llista zipf de noms i després afegir cognoms si no existeix ja a la llistA?
+    return sorted(random_names_list)
 
 def print_stats(names):
     names_len = [len(name.split()) for name in names]
@@ -55,7 +50,7 @@ def print_stats(names):
         print('\t'.join([str(each_len),str(counts[each_len]),str(counts[each_len]*100/total)]))
 
 def write_files(list):
-    with open('10k_random_names.txt', 'w') as fn: 
+    with open('10k_random_names_zipf_repetition.txt', 'w') as fn: 
         for line in list:
             fn.write(line+'\n')
 
